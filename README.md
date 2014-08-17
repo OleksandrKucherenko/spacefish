@@ -4,7 +4,7 @@ Small Arcade Game Starter, LibGdx project.
 
 # Binary
 
-[Release Version][6]
+[Release Version: v1.0.1.0-release.apk][6]
 
 # Screenshots
 
