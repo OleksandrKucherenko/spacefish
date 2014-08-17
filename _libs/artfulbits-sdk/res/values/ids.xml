@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Use for storing instance of the attached to View business item. -->
+    <item name="tag_item_instance" type="id"/>
+    <!-- Use for storing view holder instance for making access to View's instances faster. -->
+    <item name="tag_view_holder" type="id"/>
+    <!-- Use this TAG for storing view type for Adapters. -->
+    <item name="tag_view_type" type="id"/>
+    <!-- Use for storing popup progress window holder class storing.  -->
+    <item name="tag_popup_holder" type="id"/>
+
+</resources>

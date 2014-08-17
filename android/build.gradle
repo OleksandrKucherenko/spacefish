@@ -1,0 +1,275 @@
+// application: com.amaya.game.android
+
+import javax.xml.parsers.DocumentBuilderFactory
+
+buildscript {
+  repositories {
+    jcenter()
+  }
+  dependencies {
+    // CPD tool plugin dependency
+    classpath 'de.aaschmid.gradle.plugins:gradle-cpd-plugin:+'
+  }
+}
+
+apply plugin: "com.android.application"
+apply from: "${rootProject.rootDir}/gradle/config/quality.gradle"
+
+configurations { natives }
+
+dependencies {
+  /* =========================== */
+  /*         DEBUG/RELEASE       */
+  /* =========================== */
+
+  compile project(":core")
+  compile project(":_libs:artfulbits-sdk")
+  compile "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"
+
+  natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi"
+  natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi-v7a"
+  natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86"
+
+  /* =========================== */
+  /*         UNIT TESTING        */
+  /* =========================== */
+
+  /* Espresso (v1.1) */
+  androidTestCompile files(
+          "${rootProject.rootDir}/_libs/espresso/espresso-1.1.jar",
+          "${rootProject.rootDir}/_libs/espresso/testrunner-1.1.jar",
+          "${rootProject.rootDir}/_libs/espresso/testrunner-runtime-1.1.jar")
+
+  /* Hamcrest (v1.3) */
+  androidTestCompile 'org.hamcrest:hamcrest-integration:+',
+          'org.hamcrest:hamcrest-core:+',
+          'org.hamcrest:hamcrest-library:+'
+
+  /* Fest Android (v1.0.8), fest util (v1.2.5), Fest core (v 2.0M10) */
+  androidTestCompile 'com.squareup:fest-android:+'
+}
+
+android {
+  compileSdkVersion rootProject.compileSdkVersion
+  buildToolsVersion rootProject.buildToolsVersion
+
+  // Android Manifest generation options
+  defaultConfig {
+    minSdkVersion rootProject.minSdkVersion /* 10 */
+    targetSdkVersion rootProject.targetSdkVersion /* 19 */
+
+    versionCode 1
+    versionName "1.0"
+  }
+
+  sourceSets {
+    androidTest.setRoot('src/tests')
+  }
+
+  // signing keystores configuration
+  signingConfigs {
+    // custom debug key, allows to test social networks
+    debug {
+      storeFile file("${rootProject.rootDir}/gradle/release/ongame.debug.keystore")
+      storePassword 'android'
+      keyAlias 'androiddebugkey'
+      keyPassword 'android'
+    }
+    // production key
+    release {
+      storeFile file("${rootProject.rootDir}/gradle/release/ongame.keystore")
+      storePassword "ongame"
+      keyAlias "ongame"
+      keyPassword "ongame"
+    }
+  }
+
+  // supported build types of the binary
+  buildTypes {
+    // release configuration
+    release {
+      signingConfig signingConfigs.release
+
+      runProguard = true
+      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-project.pro'
+    }
+    // debug configuration with custom debug key
+    debug {
+      signingConfig signingConfigs.debug
+
+      runProguard = false
+      debuggable true
+      jniDebugBuild true
+      //testCoverageEnabled = true
+    }
+    // release without obfuscation
+    noProguardRelease.initWith(buildTypes.release)
+    noProguardRelease {
+      runProguard = false
+    }
+    // release with enabled debug options
+    debuggableRelease.initWith(buildTypes.noProguardRelease)
+    debuggableRelease {
+      debuggable true
+      jniDebugBuild true
+    }
+  }
+
+  // exclude support files from final binary
+  packagingOptions {
+    exclude 'META-INF/DEPENDENCIES.txt'
+    exclude 'META-INF/LICENSE.txt'
+    exclude 'META-INF/NOTICE.txt'
+    exclude 'META-INF/NOTICE'
+    exclude 'META-INF/LICENSE'
+    exclude 'META-INF/DEPENDENCIES'
+    exclude 'META-INF/notice.txt'
+    exclude 'META-INF/license.txt'
+    exclude 'META-INF/dependencies.txt'
+    exclude 'META-INF/LGPL2.1'
+    exclude 'META-INF/LICENSE.txt'
+    exclude 'LICENSE.txt'
+    exclude '.README'
+    exclude '.readme'
+  }
+
+  // force Unit Tests use our own AndroidManifest.xml instead of auto-generated
+  testVariants.all { variant ->
+    variant.processResources.manifestFile = android.sourceSets["androidTest"].manifest.srcFile
+
+    rootProject.logger.lifecycle("Unit Tests new manifest: " + variant.processResources.manifestFile)
+  }
+
+  // Customize APK name
+  applicationVariants.all { variant ->
+    //Rename APK
+    def String ANDROID_NAME_SPACE = "http://schemas.android.com/apk/res/android"
+    def manifestPath = android.sourceSets["main"].manifest.srcFile
+
+    def builderFactory = DocumentBuilderFactory.newInstance()
+    builderFactory.setNamespaceAware(true)
+
+    // extract manifest values
+    def manifestXml = builderFactory.newDocumentBuilder().parse(manifestPath).documentElement
+    def packageName = manifestXml.getAttribute("package")
+    def versionCode = manifestXml.getAttributeNS(ANDROID_NAME_SPACE, "versionCode")
+    def versionName = manifestXml.getAttributeNS(ANDROID_NAME_SPACE, "versionName")
+    def gitRevision = rootProject.hasProperty("GIT_REVISION") ? rootProject.properties["GIT_REVISION"] : "0"
+    def versionType = variant.name
+
+    // modify file name
+    def file = variant.outputFile
+    def version = versionName + "." + versionCode + "." + gitRevision
+    def newFilename = packageName + "-" + version + "-" + versionType + ".apk"
+    variant.outputFile = new File(file.parent, newFilename)
+
+    rootProject.logger.lifecycle("Output file name: " + newFilename)
+  }
+}
+
+// needed to add JNI shared libraries to APK when compiling on CLI
+tasks.withType(com.android.build.gradle.tasks.PackageApplication) { pkgTask ->
+  pkgTask.jniFolders = new HashSet<File>()
+  pkgTask.jniFolders.add(new File(projectDir, 'src/main/libs'))
+}
+
+// called every time gradle gets executed, takes the native dependencies of
+// the natives configuration, and extracts them to the proper libs/ folders
+// so they get packed with the APK.
+task copyAndroidNatives() {
+  file("libs/armeabi/").mkdirs();
+  file("libs/armeabi-v7a/").mkdirs();
+  file("libs/x86/").mkdirs();
+
+  configurations.natives.files.each { jar ->
+    def outputDir = null
+    if (jar.name.endsWith("natives-armeabi-v7a.jar")) outputDir = file("libs/armeabi-v7a")
+    if (jar.name.endsWith("natives-armeabi.jar")) outputDir = file("libs/armeabi")
+    if (jar.name.endsWith("natives-x86.jar")) outputDir = file("libs/x86")
+
+    if (outputDir != null) {
+      copy {
+        from zipTree(jar)
+        into outputDir
+        include "*.so"
+      }
+    }
+  }
+}
+
+task run(type: Exec) {
+  def path
+  def localProperties = project.file("../local.properties")
+  if (localProperties.exists()) {
+    Properties properties = new Properties()
+    localProperties.withInputStream { instr ->
+      properties.load(instr)
+    }
+    def sdkDir = properties.getProperty('sdk.dir')
+    if (sdkDir) {
+      path = sdkDir
+    } else {
+      path = "$System.env.ANDROID_HOME"
+    }
+  } else {
+    path = "$System.env.ANDROID_HOME"
+  }
+
+  def adb = path + "/platform-tools/adb"
+  commandLine "$adb", 'shell', 'am', 'start', '-n', 'com.amaya.game.android/com.amaya.game.android.AndroidLauncher'
+}
+
+// sets up the Android Eclipse project, using the old Ant based build.
+eclipse {
+  // need to specify Java source sets explicitly, SpringSource Gradle Eclipse plugin
+  // ignores any nodes added in classpath.file.withXml
+  sourceSets {
+    main {
+      java.srcDirs "src", 'gen'
+    }
+  }
+
+  jdt {
+    sourceCompatibility = 1.6
+    targetCompatibility = 1.6
+  }
+
+  classpath {
+    plusConfigurations += project.configurations.compile
+    containers 'com.android.ide.eclipse.adt.ANDROID_FRAMEWORK', 'com.android.ide.eclipse.adt.LIBRARIES'
+  }
+
+  project {
+    name = appName + "-android"
+    natures 'com.android.ide.eclipse.adt.AndroidNature'
+
+    buildCommands.clear();
+    buildCommand "com.android.ide.eclipse.adt.ResourceManagerBuilder"
+    buildCommand "com.android.ide.eclipse.adt.PreCompilerBuilder"
+    buildCommand "org.eclipse.jdt.core.javabuilder"
+    buildCommand "com.android.ide.eclipse.adt.ApkBuilder"
+  }
+}
+
+// sets up the Android Idea project, using the old Ant based build.
+idea {
+  module {
+    sourceDirs += file("src");
+    scopes = [COMPILE: [plus: [project.configurations.compile]]]
+
+    iml {
+      withXml {
+        def node = it.asNode()
+        def builder = NodeBuilder.newInstance();
+        builder.current = node;
+        builder.component(name: "FacetManager") {
+          facet(type: "android", name: "Android") {
+            configuration {
+              option(name: "UPDATE_PROPERTY_FILES", value: "true")
+            }
+          }
+        }
+      }
+    }
+  }
+}

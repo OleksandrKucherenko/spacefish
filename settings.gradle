@@ -1,0 +1,6 @@
+// Application
+include ':android'
+
+// Library
+include ':core'
+include ':_libs:artfulbits-sdk'

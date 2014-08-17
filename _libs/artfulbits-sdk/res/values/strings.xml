@@ -1,0 +1,4 @@
+<resources>
+    <string name="progress_message">Server connection establishing&#8230;\nTap on message to cancel action.</string>
+    <string name="progress_countdown">99.9s</string>
+</resources>

@@ -1,0 +1,47 @@
+buildscript {
+  repositories {
+    mavenCentral()
+    mavenLocal()
+  }
+  dependencies {
+    classpath 'com.android.tools.build:gradle:+'
+  }
+}
+
+ext.compileSdkVersion = 19
+ext.buildToolsVersion = "19.1.0" /* latest: "20.0.0" */
+
+// specify versions of 3rd party libs to use in project
+ext.androidSupportLib = "19.1.0" /* latest: v21.0.0-rc1 is only for Android-L */
+
+// MIN and TARGET SDKs for our binaries
+ext.targetSdkVersion = 19
+ext.minSdkVersion = 10
+
+/* Global Configuration Constants */
+ext.qualityDir = "${rootProject.rootDir}/gradle/config"
+ext.toolsFolder = "${qualityDir}/quality"
+
+allprojects {
+  apply plugin: "eclipse"
+  apply plugin: "idea"
+
+  version = '1.0'
+
+  ext {
+    appName = 'my-fish-game'
+    gdxVersion = '1.3.0'
+    roboVMVersion = '0.0.14'
+  }
+
+  repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+    maven { url "https://oss.sonatype.org/content/repositories/releases/" }
+  }
+}
+
+tasks.eclipse.doLast {
+  delete ".project"
+}

@@ -1,0 +1,45 @@
+apply plugin: "java"
+
+sourceCompatibility = 1.6
+
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+dependencies {
+  /* =========================== */
+  /*         DEBUG/RELEASE       */
+  /* =========================== */
+
+  compile "com.badlogicgames.gdx:gdx:$gdxVersion"
+  compile 'com.squareup.dagger:dagger:+'
+
+  /* =========================== */
+  /*         UNIT TESTING        */
+  /* =========================== */
+
+  /** jUnit (v4.12 beta 1) */
+  testCompile "junit:junit:+"
+
+  /* Hamcrest (v1.3) */
+  testCompile 'org.hamcrest:hamcrest-integration:+',
+          'org.hamcrest:hamcrest-core:+',
+          'org.hamcrest:hamcrest-library:+'
+
+  /* Mockito (v1.9.5) */
+  testCompile 'org.mockito:mockito-core:+'
+
+  testCompile 'com.squareup.dagger:dagger:+'
+}
+
+sourceSets {
+  main.java.srcDirs = ["src/"]
+  test.java.srcDirs = ["tests/"]
+}
+
+eclipse.project {
+  name = appName + "-core"
+}
+
+// REFERENCES:
+// jUnit for libgdx projects
+// http://shahmirj.com/blog/getting-junit-working-with-libgdx-in-gradle
+// http://www.badlogicgames.com/forum/viewtopic.php?f=11&t=14218
