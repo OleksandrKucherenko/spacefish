@@ -2,6 +2,10 @@
 
 Small Arcade Game Starter, LibGdx project. 
 
+# Binary
+
+[Release Version][6]
+
 # Screenshots
 
 ![Main Menu][2] ![Game Screen][3] ![Legend][4] ![Game Over][5]
@@ -47,3 +51,4 @@ tap on game field to set FISH a direction
   [3]: https://raw.githubusercontent.com/OleksandrKucherenko/spacefish/master/_documentation/small_game_screen.jpg
   [4]: https://raw.githubusercontent.com/OleksandrKucherenko/spacefish/master/_documentation/small_legend.jpg
   [5]: https://raw.githubusercontent.com/OleksandrKucherenko/spacefish/master/_documentation/small_game_over.jpg
+  [6]: https://db.tt/hsu4o3FJ
