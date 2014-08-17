@@ -4,11 +4,7 @@ Small Arcade Game Starter, LibGdx project.
 
 # Screenshots
 
-![Launcher Icon][1] ![Main Menu][2] 
-
-![Game Screen][3] ![Legend][4]
-
-![Game Over][5]
+![Main Menu][2] ![Game Screen][3] ![Legend][4] ![Game Over][5]
 
 # Highlights
 
