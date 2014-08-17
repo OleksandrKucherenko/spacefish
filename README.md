@@ -46,8 +46,8 @@ tap on game field to set FISH a direction
 -- Added background sound
 -- Added BACK button support (usual for Android). Also that solve some "requirements whitespaces"/issue in navigation.
 
-  [1]: https://raw.githubusercontent.com/OleksandrKucherenko/spacefish/master/_documentation/launcher.jpg
-  [2]: https://raw.githubusercontent.com/OleksandrKucherenko/spacefish/master/_documentation/main_menu.jpg
-  [3]: https://raw.githubusercontent.com/OleksandrKucherenko/spacefish/master/_documentation/game_screen.jpg
-  [4]: https://raw.githubusercontent.com/OleksandrKucherenko/spacefish/master/_documentation/legend.jpg
-  [5]: https://raw.githubusercontent.com/OleksandrKucherenko/spacefish/master/_documentation/game_over.jpg
+  [1]: https://raw.githubusercontent.com/OleksandrKucherenko/spacefish/master/_documentation/small_launcher.jpg
+  [2]: https://raw.githubusercontent.com/OleksandrKucherenko/spacefish/master/_documentation/small_main_menu.jpg
+  [3]: https://raw.githubusercontent.com/OleksandrKucherenko/spacefish/master/_documentation/small_game_screen.jpg
+  [4]: https://raw.githubusercontent.com/OleksandrKucherenko/spacefish/master/_documentation/small_legend.jpg
+  [5]: https://raw.githubusercontent.com/OleksandrKucherenko/spacefish/master/_documentation/small_game_over.jpg
