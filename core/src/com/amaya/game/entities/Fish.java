@@ -3,7 +3,6 @@ package com.amaya.game.entities;
 import com.amaya.game.Spacefish;
 import com.amaya.game.entities.behavior.StrategiesFactory;
 import com.amaya.game.entities.modifiers.Expirable;
-import com.amaya.game.entities.modifiers.Mandate;
 import com.amaya.game.entities.modifiers.Modifier;
 import com.badlogic.gdx.Gdx;
 
@@ -60,8 +59,11 @@ public class Fish extends StrategyObject {
     int points = mPoints;
 
     if (mModifiers.containsKey(Fields.POINTS)) {
-      for (Modifier cmd : mModifiers.get(Fields.POINTS)) {
-        points += cmd.Value;
+      final List<Modifier> modifiers = mModifiers.get(Fields.POINTS);
+
+      for (int i = modifiers.size() - 1; i >= 0; i--) {
+        points += modifiers.get(i).Value;
+        modifiers.remove(i);
       }
     }
 
@@ -71,12 +73,11 @@ public class Fish extends StrategyObject {
   @Override
   public float getSpeed(final float gameTime) {
     float speed = super.getSpeed();
-    final List<Mandate> toDelete = new ArrayList<Mandate>();
     final List<Modifier> speedMandates = mModifiers.get(Fields.SPEED);
 
     if (null != speedMandates) {
-      for (Modifier cmd : speedMandates) {
-        final Expirable ec = (Expirable) cmd;
+      for (int i = speedMandates.size() - 1; i >= 0; i--) {
+        final Expirable ec = (Expirable) speedMandates.get(i);
 
         if (ec.isExpired(gameTime)) {
           if (Spacefish.Debug.EXPIRED_COMMANDS) {
@@ -84,15 +85,10 @@ public class Fish extends StrategyObject {
                     ", expire: " + ec.getExpiredAt() + ", time: " + gameTime);
           }
 
-          toDelete.add(ec);
+          speedMandates.remove(i);
         } else {
-          speed *= cmd.Value;
+          speed *= ec.Value;
         }
-      }
-
-      // do cleanup after applying the commands
-      for (Mandate cmd : toDelete) {
-        speedMandates.remove(cmd);
       }
     }
 
@@ -103,6 +99,7 @@ public class Fish extends StrategyObject {
   public void reset() {
     mPoints = 0;
     mHealth = 1;
+    mModifiers.clear();
     setSpeed(1.0f);
   }
 
