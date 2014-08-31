@@ -1,6 +1,8 @@
 package com.amaya.game.entities.environment;
 
-import com.amaya.game.entities.modifiers.Command;
+import com.amaya.game.entities.modifiers.CommandsFactory;
+import com.amaya.game.entities.modifiers.Mandate;
+import com.amaya.game.entities.modifiers.Modifier;
 
 /** */
 public class Alien extends Drop {
@@ -23,27 +25,27 @@ public class Alien extends Drop {
 	/* [ CONSTRUCTORS ] ====================================================================================================================================== */
 
   /** hidden constructor. Use static methods for instance creation. */
-  protected Alien(final Command modifier) {
+  protected Alien(final Mandate modifier) {
     super(modifier);
   }
 
   /** new instance of Green alien with randomized trajectory. */
   public static Alien green(final float xOffset) {
-    return new Alien(Command.points(5))
+    return new Alien(CommandsFactory.points(5))
             .randomizeTrajectory(xOffset)
             .setTag(KnownAliens.GREEN);
   }
 
   /** new instance of Yellow alien with randomized trajectory. */
   public static Alien yellow(final float xOffset) {
-    return new Alien(Command.points(10))
+    return new Alien(CommandsFactory.points(10))
             .randomizeTrajectory(xOffset)
             .setTag(KnownAliens.YELLOW);
   }
 
   /** new instance of Orange alien with randomized trajectory. */
   public static Alien orange(final float xOffset) {
-    return new Alien(Command.points(30))
+    return new Alien(CommandsFactory.points(30))
             .randomizeTrajectory(xOffset)
             .setTag(KnownAliens.ORANGE);
   }
@@ -52,6 +54,6 @@ public class Alien extends Drop {
 
   /** Get alien cost in points. */
   public int getPoints() {
-    return (int) Modifier.Value;
+    return (int) ((Modifier) getModifier()).Value;
   }
 }

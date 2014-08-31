@@ -2,14 +2,11 @@ package com.amaya.game.entities.modifiers;
 
 import com.amaya.game.Spacefish;
 import com.amaya.game.entities.Fish;
-import com.amaya.game.entities.behavior.IOwnTrajectory;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 
 /** Ask fish to move */
-public class MoveToCommand extends Command {
+public class MoveTo extends Mandate {
   /* [ MEMBERS ] =========================================================================================================================================== */
 
   /** start point x-coordinate */
@@ -24,8 +21,8 @@ public class MoveToCommand extends Command {
 	/* [ CONSTRUCTORS ] ====================================================================================================================================== */
 
   /** hidden constructor. Use static methods for getting instance. */
-  protected MoveToCommand(float x, float y, float x1, float y1) {
-    super(Fish.Fields.POSITION, 0);
+  protected MoveTo(float x, float y, float x1, float y1) {
+    super(Fish.Fields.POSITION);
 
     StartX = x;
     StartY = y;
@@ -36,16 +33,12 @@ public class MoveToCommand extends Command {
       Gdx.app.log(Spacefish.LOG_TAG, "[move-to] start: " + getStart() + ", end: " + getEnd());
   }
 
-  public static Command moveTo(final Rectangle start, final Vector3 point) {
-    return new MoveToCommand(start.x, start.y, point.x, point.y);
-  }
-
-  public static Command moveTo(final Vector2 start, final Vector2 point) {
-    return new MoveToCommand(start.x, start.y, point.x, point.y);
-  }
-
-  public static Command moveTo(final IOwnTrajectory iot) {
-    return moveTo(iot.getStart(), iot.getEnd());
+  /** {@inheritDoc} */
+  @Override
+  public String toString() {
+    return "{name: " + Name +
+            ", start: [" + StartX + ", " + StartY + "]" +
+            ", end: [" + EndX + ", " + EndY + "]}";
   }
 
 	/* [ GETTER / SETTER METHODS ] =========================================================================================================================== */

@@ -2,8 +2,9 @@ package com.amaya.game;
 
 import com.amaya.game.entities.environment.Alien;
 import com.amaya.game.entities.environment.Asteroid;
-import com.amaya.game.entities.modifiers.Command;
-import com.amaya.game.entities.modifiers.MoveToCommand;
+import com.amaya.game.entities.modifiers.CommandsFactory;
+import com.amaya.game.entities.modifiers.Mandate;
+import com.amaya.game.entities.modifiers.MoveTo;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -45,7 +46,7 @@ public class GameRenderer {
               ICON_WIDTH, ICON_HEIGHT);
 
       if (Spacefish.Debug.ALIEN_BEHAVIOR) {
-        final MoveToCommand mtc = (MoveToCommand) MoveToCommand.moveTo(al);
+        final MoveTo mtc = (MoveTo) CommandsFactory.moveTo(al);
 
         ShapeRenderer sr = getController().getGame().getDebugShapes();
         sr.setProjectionMatrix(batch.getProjectionMatrix());
@@ -68,7 +69,7 @@ public class GameRenderer {
       batch.draw(GameResources.getInstance().getAsteroid(as), rc.x, rc.y, ICON_WIDTH, ICON_HEIGHT);
 
       if (Spacefish.Debug.ASTEROID_BEHAVIOR) {
-        final MoveToCommand mtc = (MoveToCommand) MoveToCommand.moveTo(as);
+        final MoveTo mtc = (MoveTo) CommandsFactory.moveTo(as);
 
         ShapeRenderer sr = getController().getGame().getDebugShapes();
         sr.setProjectionMatrix(batch.getProjectionMatrix());
@@ -91,7 +92,7 @@ public class GameRenderer {
 
     // DEBUG logic
     if (Spacefish.Debug.FISH_BEHAVIOR) {
-      final MoveToCommand mtc = Command.findFirst(getController().getCommands(), MoveToCommand.class);
+      final MoveTo mtc = Mandate.findFirst(getController().getMandates(), MoveTo.class);
 
       if (null != mtc) {
         ShapeRenderer sr = getController().getGame().getDebugShapes();

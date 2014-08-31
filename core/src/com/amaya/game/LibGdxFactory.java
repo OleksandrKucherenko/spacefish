@@ -12,11 +12,11 @@ public class LibGdxFactory {
 
   /** Hidden constructor. */
   private LibGdxFactory() {
-
+    // do nothing
   }
 
   /** private constructor, allows Mockito to replace instance by Mock object. */
-  private LibGdxFactory( final LibGdxFactory mock ){
+  private LibGdxFactory(final LibGdxFactory mock) {
     INSTANCE = mock;
   }
 
@@ -35,7 +35,7 @@ public class LibGdxFactory {
     return new ShapeRenderer();
   }
 
-  public OrthographicCamera newOrthographicCamera(){
+  public OrthographicCamera newOrthographicCamera() {
     final OrthographicCamera mUiCamera = new OrthographicCamera(
             Spacefish.Dimensions.VIRTUAL_SCREEN_WIDTH,
             Spacefish.Dimensions.VIRTUAL_SCREEN_HEIGHT);

@@ -1,8 +1,8 @@
 package com.amaya.game.entities.environment;
 
 import com.amaya.game.GameController;
-import com.amaya.game.entities.modifiers.Command;
-import com.amaya.game.entities.modifiers.ExpiringCommand;
+import com.amaya.game.entities.modifiers.CommandsFactory;
+import com.amaya.game.entities.modifiers.Mandate;
 
 /** Describe asteroid type. */
 public class Asteroid extends Drop {
@@ -25,27 +25,27 @@ public class Asteroid extends Drop {
 	/* [ CONSTRUCTORS ] ====================================================================================================================================== */
 
   /** hidden constructor. Use static methods for instance getting. */
-  protected Asteroid(final Command modifier) {
+  protected Asteroid(final Mandate modifier) {
     super(modifier);
   }
 
   /** new instance of SOUND asteroid with randomized trajectory. */
   public static Asteroid sound(final float xOffset) {
-    return new Asteroid(Command.event(GameController.Events.ANNOYING_SOUND))
+    return new Asteroid(CommandsFactory.event(GameController.Events.ANNOYING_SOUND))
             .randomizeTrajectory(xOffset)
             .setTag(KnownAsteroids.SOUND);
   }
 
   /** new instance of SPEED reducing asteroid with randomized trajectory. */
   public static Asteroid speed(final float xOffset) {
-    return new Asteroid(ExpiringCommand.speed(0.5f, 2))
+    return new Asteroid(CommandsFactory.speed(0.5f, 2))
             .randomizeTrajectory(xOffset)
             .setTag(KnownAsteroids.SPEED);
   }
 
   /** new instance of DEATH asteroid with randomized trajectory. */
   public static Asteroid death(final float xOffset) {
-    return new Asteroid(Command.life(-1))
+    return new Asteroid(CommandsFactory.life(-1))
             .randomizeTrajectory(xOffset)
             .setTag(KnownAsteroids.DEATH);
   }

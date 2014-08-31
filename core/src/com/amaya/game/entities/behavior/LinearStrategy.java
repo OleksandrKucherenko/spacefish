@@ -1,9 +1,9 @@
 package com.amaya.game.entities.behavior;
 
-import com.amaya.game.GameObject;
 import com.amaya.game.Spacefish;
-import com.amaya.game.entities.modifiers.Command;
-import com.amaya.game.entities.modifiers.MoveToCommand;
+import com.amaya.game.entities.StrategyObject;
+import com.amaya.game.entities.modifiers.Mandate;
+import com.amaya.game.entities.modifiers.MoveTo;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 
@@ -15,9 +15,9 @@ public class LinearStrategy implements IStrategy {
 
   /** {@inheritDoc} */
   @Override
-  public void update(final GameObject entity, final List<Command> commands, final float delta) {
-    final float speed = entity.getSpeed();
-    final MoveToCommand cmd = Command.findFirst(commands, MoveToCommand.class);
+  public void update(final StrategyObject entity, final List<Mandate> mandates, final float gameTime, final float delta) {
+    final float speed = entity.getSpeed(gameTime);
+    final MoveTo cmd = Mandate.findFirst(mandates, MoveTo.class);
 
     if (null != cmd) {
       final Vector2 current = entity.getPosition();

@@ -141,7 +141,7 @@ public class LevelScreen extends BaseScreen {
     boolean processed;
 
     // give super class chance to process BACK button
-    if( !( processed = super.touched() ) ) {
+    if (!(processed = super.touched())) {
       final Vector3 touch = unprojectTouch();
 
       if (Spacefish.Debug.UI_CLICKS)
@@ -201,7 +201,7 @@ public class LevelScreen extends BaseScreen {
     for (Button btn : mButtons) {
       batch.draw(resolve(btn), btn.Bounds.x, btn.Bounds.y, btn.Bounds.width, btn.Bounds.height);
 
-      debugRect( btn.Bounds );
+      debugRect(btn.Bounds);
     }
   }
 
@@ -213,7 +213,7 @@ public class LevelScreen extends BaseScreen {
 
     final Fish fish = mController.getGame().getFish();
 
-    final String points = String.valueOf(fish.Points);
+    final String points = String.valueOf(fish.getPoints());
     final BitmapFont.TextBounds bounds = font.getBounds(points);
 
     final float x = Dimensions.VIRTUAL_SCREEN_WIDTH - Dimensions.ICON_PADDING - bounds.width;

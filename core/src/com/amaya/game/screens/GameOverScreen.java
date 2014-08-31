@@ -47,7 +47,7 @@ public class GameOverScreen extends BaseScreen {
 
     // '0'
     yPosition -= (boundsScores.height + DELIMITER * 3);
-    final String points = String.valueOf(getGame().getFish().Points);
+    final String points = String.valueOf(getGame().getFish().getPoints());
     final BitmapFont.TextBounds boundsPoints = font.getBounds(points);
     font.draw(batch, points, (VIRTUAL_SCREEN_WIDTH - boundsPoints.width) / 2, yPosition);
 

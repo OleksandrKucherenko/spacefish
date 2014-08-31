@@ -1,4 +1,4 @@
-package com.amaya.game;
+package com.amaya.game.entities;
 
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -9,8 +9,6 @@ public class GameObject {
 
   /** Entity bounds */
   public final Rectangle Bounds;
-  /** Game object speed. */
-  private float mSpeed = 0;
   /** Reference on custom user data. */
   private Object mTag;
 
@@ -26,14 +24,6 @@ public class GameObject {
   }
 
 	/* [ GETTER / SETTER METHODS ] =========================================================================================================================== */
-
-  public float getSpeed() {
-    return mSpeed;
-  }
-
-  public void setSpeed(final float speed) {
-    mSpeed = speed;
-  }
 
   public Vector2 getPosition() {
     return new Vector2(Bounds.x, Bounds.y);

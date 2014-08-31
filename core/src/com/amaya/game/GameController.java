@@ -3,10 +3,12 @@ package com.amaya.game;
 import com.amaya.game.entities.Fish;
 import com.amaya.game.entities.Level;
 import com.amaya.game.entities.environment.Drop;
-import com.amaya.game.entities.modifiers.Command;
-import com.amaya.game.entities.modifiers.EventCommand;
-import com.amaya.game.entities.modifiers.ExpiringCommand;
-import com.amaya.game.entities.modifiers.MoveToCommand;
+import com.amaya.game.entities.modifiers.CommandsFactory;
+import com.amaya.game.entities.modifiers.Event;
+import com.amaya.game.entities.modifiers.Expirable;
+import com.amaya.game.entities.modifiers.Mandate;
+import com.amaya.game.entities.modifiers.Modifier;
+import com.amaya.game.entities.modifiers.MoveTo;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -31,7 +33,7 @@ public class GameController {
   /** Reference on current game. */
   private final Spacefish mGame;
   /** Stack of commands for execution. */
-  private final List<Command> mCommands = new ArrayList<Command>();
+  private final List<Mandate> mMandates = new ArrayList<Mandate>();
   /** Accumulated game time. */
   private float mGameTime = 0;
   /** Current state of the game. */
@@ -58,13 +60,13 @@ public class GameController {
       return false;
 
     // drop old "move-to' command if exist one
-    final MoveToCommand mtc = Command.findFirst(getCommands(), MoveToCommand.class);
+    final MoveTo mtc = Mandate.findFirst(getMandates(), MoveTo.class);
 
     if (null != mtc) {
-      getCommands().remove(mtc);
+      getMandates().remove(mtc);
     }
 
-    getCommands().add(MoveToCommand.moveTo(getGame().getFish().Bounds, point));
+    getMandates().add(CommandsFactory.moveTo(getGame().getFish().Bounds, point));
 
     return true;
   }
@@ -94,8 +96,8 @@ public class GameController {
   }
 
   /** Stack of commands for execution. */
-  public List<Command> getCommands() {
-    return mCommands;
+  public List<Mandate> getMandates() {
+    return mMandates;
   }
 
   /** Accumulated game time. */
@@ -114,33 +116,35 @@ public class GameController {
   /* [ IMPLEMENTATION & HELPERS ] ========================================================================================================================== */
 
   private void processCommands(final float delta) {
-    final List<Command> toDelete = new ArrayList<Command>();
+    final List<Mandate> toDelete = new ArrayList<Mandate>();
 
-    for (Command cmd : getCommands()) {
-      if (cmd instanceof MoveToCommand) {
-        if (processMoveTo((MoveToCommand) cmd, delta)) {
+    for (Mandate cmd : getMandates()) {
+      if (cmd instanceof MoveTo) {
+        if (processMoveTo((MoveTo) cmd, delta)) {
           toDelete.add(cmd);
         }
-      } else if (cmd instanceof ExpiringCommand) {
-        if (processExpiring((ExpiringCommand) cmd, delta)) {
+      } else if (cmd instanceof Expirable) {
+        if (processExpiring((Expirable) cmd, delta)) {
           toDelete.add(cmd);
         }
-      } else if (cmd instanceof EventCommand) {
-        if (processEvent((EventCommand) cmd, delta)) {
+      } else if (cmd instanceof Event) {
+        if (processEvent((Event) cmd, delta)) {
           toDelete.add(cmd);
         }
-      } else if (processOther(cmd, delta)) {
-        toDelete.add(cmd);
+      } else if (cmd instanceof Modifier) {
+        if (processOther((Modifier) cmd, delta)) {
+          toDelete.add(cmd);
+        }
       }
     }
 
     // do cleanup after applying the commands
-    for (Command cmd : toDelete) {
-      getCommands().remove(cmd);
+    for (Mandate cmd : toDelete) {
+      getMandates().remove(cmd);
     }
   }
 
-  private boolean processEvent(final EventCommand event, final float delta) {
+  private boolean processEvent(final Event event, final float delta) {
     if (Events.ANNOYING_SOUND.equals(event.Name)) {
       GameResources.getInstance().getHitSound().play();
 
@@ -150,45 +154,26 @@ public class GameController {
     return false;
   }
 
-  private boolean processExpiring(final ExpiringCommand cmd, final float delta) {
+  private boolean processExpiring(final Expirable cmd, final float delta) {
 
     if (Fish.Fields.SPEED.equals(cmd.Name)) {
-      final Fish fish = getGame().getFish();
-
-      if (!cmd.isApplied()) {
-        final float speed = cmd.apply(getGameTime(), fish.getSpeed());
-
-        if (Spacefish.Debug.EXPIRED_COMMANDS)
-          Gdx.app.log(TAG, "[expired] applied. New speed: " + speed);
-
-        fish.setSpeed(speed);
-      }
-
-      if (cmd.isExpired(getGameTime())) {
-        final float speed = cmd.rollback(fish.getSpeed());
-
-        if (Spacefish.Debug.EXPIRED_COMMANDS)
-          Gdx.app.log(TAG, "[expired] rollback. New speed: " + speed);
-
-        fish.setSpeed(speed);
-
-        return true;
-      }
+      getGame().getFish().addModifier(cmd);
+      return true;
     }
 
     return false;
   }
 
-  private boolean processMoveTo(final MoveToCommand mtc, final float delta) {
+  private boolean processMoveTo(final MoveTo mtc, final float delta) {
     // game entity
     final Fish fish = getGame().getFish();
 
     // modifiers/commands
-    final List<Command> commands = new ArrayList<Command>();
-    commands.add(mtc);
+    final List<Mandate> mandates = new ArrayList<Mandate>();
+    mandates.add(mtc);
 
     // apply movement algorithm
-    fish.Behavior.update(fish, commands, delta);
+    fish.getStrategy().update(fish, mandates, getGameTime(), delta);
 
     // try to detect is our behavior processing finished or not
     final Vector2 current = fish.getPosition();
@@ -209,20 +194,13 @@ public class GameController {
     return false;
   }
 
-  private boolean processOther(final Command cmd, final float delta) {
+  private boolean processOther(final Modifier cmd, final float delta) {
+    final Fish fish = getGame().getFish().addModifier(cmd);
 
-    final Fish fish = getGame().getFish();
-
-    if (Fish.Fields.POINTS.equals(cmd.Name)) {
-      fish.Points += cmd.Value;
-    } else if (Fish.Fields.HEALTH.equals(cmd.Name)) {
-      fish.Health += cmd.Value;
-
-      // end of the game
-      if (fish.Health <= 0) {
-        setState(KnownStates.GAME_OVER);
-        getGame().navigateToGameOver();
-      }
+    // end of the game
+    if (fish.getHealth() <= 0) {
+      setState(KnownStates.GAME_OVER);
+      getGame().navigateToGameOver();
     }
 
     return true;
@@ -248,7 +226,7 @@ public class GameController {
   private void processLevelDrops(final List<? extends Drop> list, final float delta) {
     // calculate new positions
     for (Drop drop : list) {
-      drop.Behavior.update(drop, null, delta);
+      drop.getStrategy().update(drop, null, getGameTime(), delta);
     }
 
     // do cleanup
@@ -275,10 +253,10 @@ public class GameController {
       if (drop.Bounds.overlaps(rc)) {
         if (Spacefish.Debug.FISH_COLLISIONS) {
           Gdx.app.log(TAG, "[collision] with: " + drop.Bounds + ", entity: " + drop.getClass().getSimpleName());
-          Gdx.app.log(TAG, "[collision] modifier: " + drop.Modifier);
+          Gdx.app.log(TAG, "[collision] modifier: " + drop.getModifier());
         }
 
-        getCommands().add(drop.Modifier);
+        getMandates().add(drop.getModifier());
         list.remove(i);
       }
     }
